@@ -1,0 +1,296 @@
+-------------------------------------------------
+------- TABLAS, CAMPOS, TIPO DE DATO ------------
+-------------------------------------------------
+
+--Crear una tabla Clientes con los siguientes campos:
+--Id (Entero )
+--Nombre (Cadena de Texto hasta 50 caracteres)
+--Nombre2 (Cadena de Texto hasta 50 caracteres)
+--Apellido (Cadena de Texto hasta 50 caracteres)
+--FechaCreacion (fecha/hora)
+--Sexo (Cadena de texto de 1 carácter)
+
+--Ejecutar SP_Tables y SP_Columns para obtener la información de las tablas de la base y las columnas de la tabla Cliente.
+
+sp_tables
+
+sp_columns 'Cliente'
+
+-------------------------------------------------
+----------- INTEGRIDAD DE CAMPOS ----------------
+-------------------------------------------------
+
+---------------------
+-- NULL y NOT NULL
+---------------------
+CREATE TABLE Clientes (
+	Id			INT			NOT NULL,
+	Nombre		VARCHAR(50) NOT NULL,
+	Nombre2		VARCHAR(50) NULL,
+	Apellido	VARCHAR(50) NOT NULL
+)
+GO
+
+INSERT INTO Clientes(Id,Nombre,Nombre2,Apellido)
+VALUES (1,'Johan',NULL,'Cruyff')
+
+INSERT INTO Clientes(Id,Nombre,Nombre2,Apellido)
+VALUES (2,NULL,'Armando','Maradona')
+
+INSERT INTO Clientes(Id,Nombre,Nombre2,Apellido)
+VALUES (2,'Diego','Armando','Maradona')
+
+SELECT * from Clientes
+
+---------------------
+-- DEFAULT
+---------------------
+DROP TABLE Clientes
+GO
+
+CREATE TABLE Clientes (
+	Id				INT			NOT NULL,
+	Nombre			VARCHAR(50) NOT NULL,
+	Nombre2			VARCHAR(50) NULL,
+	Apellido		VARCHAR(50) NOT NULL,
+	FechaCreacion	datetime	NOT NULL
+		CONSTRAINT [DF_Clientes_FechaCreacion] DEFAULT (GETDATE())
+)
+GO
+
+INSERT INTO Clientes(Id,Nombre,Nombre2,Apellido)
+VALUES (1,'Johan',NULL,'Cruyff')
+
+INSERT INTO Clientes(Id,Nombre,Nombre2,Apellido,FechaCreacion)
+VALUES (2,'Diego','Armando','Maradona','2019-12-31')
+
+INSERT INTO Clientes(Id,Nombre,Nombre2,Apellido,FechaCreacion)
+VALUES (3,'Franz',NULL,'Beckenbauer',NULL)
+
+SELECT * from Clientes
+
+---------------------
+-- IDENTITY
+---------------------
+DROP TABLE Clientes
+GO
+
+CREATE TABLE Clientes (
+	Id				INT			IDENTITY(1,1),
+	Nombre			VARCHAR(50) NOT NULL,
+	Nombre2			VARCHAR(50) NULL,
+	Apellido		VARCHAR(50) NOT NULL,
+	FechaCreacion	datetime	NOT NULL
+		CONSTRAINT [DF_Clientes_FechaCreacion] DEFAULT (GETDATE())
+)
+GO
+
+INSERT INTO Clientes(Id,Nombre,Nombre2,Apellido)
+VALUES (1,'Johan',NULL,'Cruyff')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido)
+VALUES ('Johan',NULL,'Cruyff')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido,FechaCreacion)
+VALUES ('Diego','Armando','Maradona','2019-12-31')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido)
+VALUES ('Franz',NULL,'Beckenbauer')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido)
+VALUES ('Edson','Arantes','do Nascimento')
+
+SELECT * from Clientes
+
+---------------------
+-- Campo Calculado
+---------------------
+DROP TABLE Clientes
+GO
+
+CREATE TABLE Clientes (
+	Id				INT			IDENTITY(2,4),
+	Nombre			VARCHAR(50) NOT NULL,
+	Nombre2			VARCHAR(50) NULL,
+	Apellido		VARCHAR(50) NOT NULL,
+	FechaCreacion	datetime	NOT NULL
+		CONSTRAINT [DF_Clientes_FechaCreacion] DEFAULT (GETDATE()),
+	NombreCompleto AS Nombre+' '+ISNULL(Nombre2,'')+' '+Apellido
+)
+GO
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido)
+VALUES ('Johan',NULL,'Cruyff')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido,FechaCreacion)
+VALUES ('Diego','Armando','Maradona','2019-12-31')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido)
+VALUES ('Franz',NULL,'Beckenbauer')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido)
+VALUES ('Edson','Arantes','do Nascimento')
+
+SELECT * from Clientes
+
+
+---------------------
+-- CHECK
+---------------------
+DROP TABLE Clientes
+GO
+
+CREATE TABLE Clientes (
+	Id				INT			IDENTITY(2,4),
+	Nombre			VARCHAR(50) NOT NULL,
+	Nombre2			VARCHAR(50) NULL,
+	Apellido		VARCHAR(50) NOT NULL,
+	FechaCreacion	datetime	NOT NULL
+		CONSTRAINT [DF_Clientes_FechaCreacion] DEFAULT (GETDATE()),
+	NombreCompleto AS Nombre+' '+ISNULL(Nombre2,'')+' '+Apellido,
+	Sexo			CHAR(1) CHECK (Sexo='F' OR Sexo='M')
+)
+GO
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido,Sexo)
+VALUES ('Johan',NULL,'Cruyff','M')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido,FechaCreacion)
+VALUES ('Diego','Armando','Maradona','2019-12-31')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido,Sexo)
+VALUES ('Franz',NULL,'Beckenbauer','W')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido,Sexo)
+VALUES ('Franz',NULL,'Beckenbauer','M')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido,Sexo)
+VALUES ('Edson','Arantes','do Nascimento','M')
+
+INSERT INTO Clientes(Nombre,Nombre2,Apellido,Sexo)
+VALUES ('Mia',NULL,'Hamm','F')
+
+ 
+
+---------------------
+-- UNIQUE
+---------------------
+
+--Crear la tabla NombresUnicos(Id,Nombre) CAMPO UNIQUE
+
+--Insertar Datos
+INSERT INTO NombresUnicos(Nombre)
+VALUES ('Lionel')
+
+INSERT INTO NombresUnicos(Nombre)
+VALUES ('Ivan')
+
+INSERT INTO NombresUnicos(Nombre)
+VALUES ('Lionel')
+
+INSERT INTO NombresUnicos(Nombre)
+VALUES ('Alejandro')
+
+select * from NombresUnicos
+
+-------------------------------------------------
+----------- INTEGRIDAD REFERENCIAL --------------
+-------------------------------------------------
+
+---------------------
+-- FOREIGN KEY
+---------------------
+
+--Crear la tabla Libro(Id,IdEditorial,Titulo,Area)
+--con clave foranea a Editorial
+
+--Insertar Datos
+INSERT INTO Libro(Id,IdEditorial,Titulo,Area)
+VALUES(1,1,'Libro 1','HIST')
+
+INSERT INTO Libro(Id,IdEditorial,Titulo,Area)
+VALUES(2,1,'Libro 2','LENG')
+
+INSERT INTO Libro(Id,IdEditorial,Titulo,Area)
+VALUES(3,2,'Libro 3','MATE')
+
+INSERT INTO Libro(Id,IdEditorial,Titulo,Area)
+VALUES(4,3,'Libro 4','HIST')
+
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+--Libro sin Editorial
+INSERT INTO Libro(Id,IdEditorial,Titulo,Area)
+VALUES(5,NULL,'Libro 5','FIS')
+
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+--Libro con Editorial que no existe
+INSERT INTO Libro(Id,IdEditorial,Titulo,Area)
+VALUES(6,9999,'Libro 6','FIS')
+
+--Modificar Editorial con hijos
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+UPDATE Editorial
+SET Id=999
+WHERE Id=2
+
+--Modificar la editorial de un libro a una que no exista
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+UPDATE Libro
+SET IdEditorial=999
+WHERE Id=2
+
+--Eliminar Editorial con hijos
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+DELETE FROM Editorial WHERE Id=2
+
+--Modificar Editorial sin hijos
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+UPDATE Editorial
+SET Id=999
+WHERE Id=4
+
+--Eliminar Editorial sin hijos
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+DELETE FROM Editorial WHERE Id=999
+
+-------------------------------------
+-- FOREIGN KEY - CASCADE CONSTRAINT
+-------------------------------------
+
+--Modificar el Foreign con update cascade
+
+--Modificar Editorial con hijos
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+UPDATE Editorial
+SET Id=999
+WHERE Id=2
+
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+--Modificar el Foreign con delete cascade
+
+--Eliminar Editorial con hijos
+SELECT * FROM Editorial
+SELECT * FROM Libro
+
+DELETE FROM Editorial WHERE Id=3
+
+SELECT * FROM Editorial
+SELECT * FROM Libro
